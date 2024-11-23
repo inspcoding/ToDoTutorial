@@ -43,6 +43,10 @@
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\CodeHelpers\CodeHelpers\CodeHelpers.csproj" />
+  </ItemGroup>
+
     <Target Name="PostPublish" AfterTargets="AfterPublish">
 	    <Exec Command="gh-pages.bat" />
     </Target>
