@@ -1,26 +1,31 @@
-﻿using Blazored.LocalStorage;
-using CodeHelpers.Framework;
+﻿using CodeHelpers.Framework;
 using ToDoTutorial.Core.Features.AddToDoTask;
 using ToDoTutorial.Core.Framework;
+using static CodeHelpers.Logic.StringHelper;
 
 namespace ToDoTutorial.Core.Logic;
 
 public class ToDoManager(ILogger<ToDoManager> logger, LocalStorageContext localStorageContext)
 {
-    private readonly ILogger<ToDoManager> _logger = logger;
-
     private readonly List<TaskItem> Items = [];
 
     private int GetTotalCount() => Items.Count;
     private int GetCompletedCount() => Items.FindAll(x => x.Complete).Count;
-    private string GetTaskCountSingleOrPlural() => GetTotalCount() == 1 ? "Task" : "Tasks";
+
+    private async Task UpdateTaskItems()
+    {
+        if (localStorageContext is not null)
+        {
+            await localStorageContext.SetItemsAsync<TaskItem>("Tasks", Items);
+        }
+    }
 
     public string GetCompletionString()
     {
         var result = "(Currently No Tasks)";
         if(GetTotalCount() > 0)
         {
-            result = $"({GetCompletedCount()} of {GetTotalCount()}) {GetTaskCountSingleOrPlural()} Complete";
+            result = $"({this.GetCompletedCount()} of {this.GetTotalCount()}) {GetSingleOrPluralString("Task", this.GetTotalCount())} Complete";
         }
 
         return result;            
@@ -47,7 +52,7 @@ public class ToDoManager(ILogger<ToDoManager> logger, LocalStorageContext localS
             TaskItem item = new(Guid.CreateVersion7(), taskName);
             Items.Add(item);            
             await UpdateTaskItems();
-            Log.TaskItemAdded(_logger, item.Id.ToString());
+            Log.TaskItemAdded(logger, item.Id.ToString());
         }
     }
 
@@ -58,7 +63,7 @@ public class ToDoManager(ILogger<ToDoManager> logger, LocalStorageContext localS
         {
             item.Complete = !item.Complete;
             await UpdateTaskItems();
-            Log.TaskItemCompletionChanged(_logger, item.Id.ToString(), item.Complete);
+            Log.TaskItemCompletionChanged(logger, item.Id.ToString(), item.Complete);
         }
     }
 
@@ -69,15 +74,7 @@ public class ToDoManager(ILogger<ToDoManager> logger, LocalStorageContext localS
         {
             Items.Remove(item);
             await UpdateTaskItems();
-            Log.TaskItemDeleted(_logger, item.Id.ToString());
+            Log.TaskItemDeleted(logger, item.Id.ToString());
         }
-    }
-
-    private async Task UpdateTaskItems()
-    {
-        if (localStorageContext is not null)
-        {
-            await localStorageContext.SetItemsAsync<TaskItem>("Tasks", Items);
-        }        
     }
 }

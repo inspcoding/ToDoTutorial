@@ -12,12 +12,12 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-builder.Services.AddScoped<ToDoManager>();
 builder.Services.AddScoped<LocalStorageContext>();
+builder.Services.AddScoped<ToDoManager>();
 
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFluentUIComponents();
 builder.Services.AddDataGridEntityFrameworkAdapter();
-builder.Services.AddBlazoredLocalStorage();
 
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
